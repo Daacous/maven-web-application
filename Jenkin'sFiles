@@ -1,0 +1,36 @@
+node{
+
+def mavenproject = tool name: 'maven3.9.6'
+
+properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')), [$class: 'JobLocalConfiguration', changeReasonComment: ''], pipelineTriggers([pollSCM('* * * * * ')])])
+
+echo "Branch name is: ${env.BRANCH_NAME}" 
+echo "Build number is: ${env.BUILD_NUMBER}" 
+echo "Job name is: ${env.JOB_NAME}" 
+echo "Node name is: ${env.NODE_NAME}" 
+echo "Jenkins url is: ${env.JENKINS_URL}" 
+
+
+stage('CheckOutCode'){git branch: 'development', credentialsId: '977cd1c1-0524-42a5-8bfd-88b210d55250', url: 'https://github.com/Daacous/maven-web-application.git'
+}
+
+stage('Build'){
+sh "${mavenproject}/bin/mvn clean package"
+}
+
+stage('ExecuteSonarqubereport'){
+sh "${mavenproject}/bin/mvn clean sonar:sonar"
+}
+
+stage('UploadNexusArtifactory'){
+sh "${mavenproject}/bin/mvn clean deploy"
+}
+
+stage('deployTomcat'){
+sshagent(['a6da4d6f-96f3-49c4-94da-fd213e3a5aa1']){
+sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.34.25:/opt/apache-tomcat-9.0.83/webapps/"
+    
+}
+}
+
+}
