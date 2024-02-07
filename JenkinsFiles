@@ -21,10 +21,11 @@ sh "${mavenproject}/bin/mvn clean package"
 stage('ExecuteSonarqubereport'){
 sh "${mavenproject}/bin/mvn clean sonar:sonar"
 }
-
+*/
 stage('UploadNexusArtifactory'){
 sh "${mavenproject}/bin/mvn clean deploy"
 }
+/*
 
 stage('deployTomcat'){
 sshagent(['a6da4d6f-96f3-49c4-94da-fd213e3a5aa1']){
